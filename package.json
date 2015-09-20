@@ -1,0 +1,33 @@
+{
+  "name": "electron-updater-gh-releases",
+  "version": "1.0.0",
+  "description": "An electron app updater with GitHub releases",
+  "main": "updater.js",
+  "scripts": {
+    "test": "eslint . && mocha tests/*.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mugifly/electron-updater-gh-releases.git"
+  },
+  "keywords": [
+    "electron"
+  ],
+  "author": "Masanori Ohgita",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mugifly/electron-updater-gh-releases/issues"
+  },
+  "homepage": "https://github.com/mugifly/electron-updater-gh-releases#readme",
+  "dependencies": {
+    "https": "^1.0.0",
+    "jszip": "^2.5.0",
+    "mkdirp": "^0.5.1",
+    "request": "^2.62.0",
+    "temp": "^0.8.3"
+  },
+  "devDependencies": {
+    "eslint": "^1.5.0",
+    "mocha": "^2.3.2"
+  }
+}
