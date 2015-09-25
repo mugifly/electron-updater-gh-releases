@@ -1,6 +1,6 @@
 {
   "name": "electron-updater-gh-releases",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "An electron app updater with GitHub releases",
   "main": "updater.js",
   "scripts": {

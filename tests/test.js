@@ -2,10 +2,6 @@ var assert = require('assert');
 
 var Updater = require('../updater');
 
-describe('Detecting of newer version', function() {
-
-});
-
 describe('Choosing of a suitable asset', function() {
 
 	var assets = [

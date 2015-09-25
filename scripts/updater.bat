@@ -29,7 +29,7 @@ exit 0
 :: Execute the startup testing for the new app
 :do_app_self_test
 	:: Launch the app of new version under self testing mode
-	start /wait %NEW_VER_DIR%\%APP_NAME% --self-test
+	start /wait %NEW_VER_DIR%\%APP_NAME% --upd-self-test
 	:: Check the testing result
 	if not %ERRORLEVEL% == 0 (
 		:: Failed

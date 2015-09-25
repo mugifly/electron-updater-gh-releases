@@ -64,7 +64,7 @@ var Updater = function(options) {
 Updater.doSelfTestIfNeeded = function() {
 
 	// Check whether the app started as self testing mode
-	if (process.execArgv.indexOf('--self-test') == -1) return; // If not needed
+	if (process.argv.indexOf('--upd-self-test') == -1) return; // If not needed
 
 	// Quit the app for indicate as successful
 	process.exit(0);

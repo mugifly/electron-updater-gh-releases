@@ -12,7 +12,7 @@ do_app_self_test() {
 	# Change a permission
 	chmod u+x "${NEW_VER_DIR}/${APP_NAME}"
 	# Launch the app of new version under self testing mode
-	"${NEW_VER_DIR}/${APP_NAME}" --self-test
+	"${NEW_VER_DIR}/${APP_NAME}" --upd-self-test
 	# Check the testing result
 	if [ $? -ne 0 ]; then
 		# Failed
