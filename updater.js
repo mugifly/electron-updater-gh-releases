@@ -29,7 +29,7 @@ var Updater = function(options) {
 	this.ghApiReleasesUrl = 'https://api.github.com/repos/' + options.ghAccountName + '/' + options.ghRepoName +  '/releases';
 
 	// Prefix for temporary directory
-	this.tmpDirPrefix = options.tmpDirPrefix || 'update-';
+	this.tmpDirPrefix = options.tmpDirPrefix || 'upd-';
 
 	// User-Agent string
 	this.userAgent = options.userAgent || 'electron-updater-gh-releases';
@@ -66,7 +66,8 @@ Updater.doSelfTestIfNeeded = function() {
 	// Check whether the app started as self testing mode
 	if (process.argv.indexOf('--upd-self-test') == -1) return; // If not needed
 
-	// Quit the app for indicate as successful
+	// Indicate as successful
+	console.log('OKAY');
 	process.exit(0);
 
 };
@@ -489,17 +490,18 @@ Updater.prototype._doPostProcess = function(new_ver_dir) {
 	}
 
 	// Get a path of shell script
-	var sh_dir = path.join(new_ver_dir, 'resources', 'app', 'scripts');
+	var sh_dir = path.join(new_ver_dir, 'resources', 'app', 'node_modules', 'electron-updater-gh-releases', 'scripts');
 	var sh_path = null;
 	if (self.devicePlatform == 'win32') { // Windows
-		sh_path = sh_dir + path.sep + 'updater.bat';
+		var cmd = process.env.COMSPEC || 'cmd.exe';
+		sh_path = cmd + ' /c ' + sh_dir + path.sep + 'updater.bat';
 	} else { // Unix
 		sh_path = 'sh ' + sh_dir + path.sep + 'updater.sh';
 	}
 
 	// Execute the shell script
-	self._dlog('_doPostProcess - Execute: ' + sh_path + ' ' + self.executableFileName + ' ' + app_dir + ' ' + new_ver_dir);
-	var sh_args = [self.executableFileName, app_dir, new_ver_dir];
+	self._dlog('_doPostProcess - Execute: ' + sh_path + ' ' + self.execFileName + ' ' + app_dir + ' ' + new_ver_dir);
+	var sh_args = [self.execFileName, app_dir, new_ver_dir];
 	var child = null;
 	try {
 		child = child_process.spawn(sh_path, sh_args, {
