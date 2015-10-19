@@ -54,6 +54,9 @@ var Updater = function(options) {
 	// Get the architecture string -- e.g. ia32, x64, arm
 	this.deviceArch = options.deviceArch || os.arch();
 
+	// Flag to prevent the multiple running
+	this.isRunning = false;
+
 };
 
 
@@ -85,6 +88,10 @@ Updater.prototype.checkAndUpdate = function(callback) {
 	if (self.updateCheckedAt != 0 && new Date().getTime() - self.updateCheckedAt < self.updateCheckInterval) {
 		self._dlog('checkAndUpdate - Not yet reached to interval');
 		callback(false, false, self.appVersion, null);
+		return;
+	} else if (self.isRunning) {
+		self._dlog('checkAndUpdate - Now running a process by other oppotunity');
+		callback(false, false, null, null);
 		return;
 	}
 
@@ -172,6 +179,14 @@ Updater.prototype.update = function(version_str, asset, callback) {
 
 	var self = this;
 
+	// To prevent a multiple running
+	if (self.isRunning) {
+		self._dlog('checkAndUpdate - Canceled; Because an process by other opportunity is running.');
+		callback(false, 'Canceled; Because an process by other opportunity is running.');
+		return;
+	}
+	self.isRunning = true;
+
 	var asset_name = asset.name;
 	var asset_url = asset.browser_download_url;
 	self._dlog('checkAndUpdate - Selected asset: ' + asset_name + ' - ' + asset_url);
@@ -180,9 +195,11 @@ Updater.prototype.update = function(version_str, asset, callback) {
 	self._getArchiveUrlByBrowserDownloadUrl(asset_url, function(archive_url, error_str) {
 
 		if (error_str != null) {
+			self.isRunning = false;
 			callback(false, error_str);
 			return;
 		} else if (self.isDryRun) {
+			self.isRunning = false;
 			self._dlog('checkAndUpdate - Dry-run mode was enabled; It doesn\'t download the archive file.');
 			callback(true, null);
 			return;
@@ -205,6 +222,7 @@ Updater.prototype.update = function(version_str, asset, callback) {
 				// Make a temporary directory
 				temp.mkdir(self.tmpDirPrefix, function(err, tmp_dir_path) {
 					if (err) { // If failed
+						self.isRunning = false;
 						callback(false, err.toString());
 						return;
 					}
@@ -213,6 +231,7 @@ Updater.prototype.update = function(version_str, asset, callback) {
 					self._extractZipArchive(tmp_file_path, tmp_dir_path, function(is_success, error_str) {
 
 						if (!is_success) { // If failed
+							self.isRunning = false;
 							callback(false, error_str);
 							return;
 						}
@@ -223,12 +242,14 @@ Updater.prototype.update = function(version_str, asset, callback) {
 						// Execute the post processing in shell script
 						var spawn_error_str = self._doPostProcess(tmp_dir_path);
 						if (spawn_error_str != null) {
+							self.isRunning = false;
 							callback(false, spawn_error_str);
 							return;
 						}
 
 						// Quit my self
 						var timer = setTimeout(function() {
+							self.isRunning = false;
 							process.exit(0);
 						}, 500);
 
@@ -237,9 +258,11 @@ Updater.prototype.update = function(version_str, asset, callback) {
 
 			})
 			.on('error', function(e) {
+				self.isRunning = false;
 				callback(false, e.toString());
 			});
 		} catch (e) {
+			self.isRunning = false;
 			callback(false, e.toString());
 		}
 
@@ -505,7 +528,8 @@ Updater.prototype._doPostProcess = function(new_ver_dir) {
 	var child = null;
 	try {
 		child = child_process.spawn(sh_path, sh_args, {
-			detached: true
+			detached: true,
+			stdio: [ 'ignore', 'ignore', 'ignore' ]
 		});
 		child.unref();
 	} catch (e) {
