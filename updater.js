@@ -89,21 +89,10 @@ Updater.prototype.checkAndUpdate = function(callback) {
 		self._dlog('checkAndUpdate - Not yet reached to interval');
 		callback(false, false, self.appVersion, null);
 		return;
-	} else if (self.isRunning) {
-		self._dlog('checkAndUpdate - Now running a process by other oppotunity');
-		callback(false, false, null, null);
-		return;
 	}
 
 	// Check a newer version
 	self.checkUpdateAvailable(function(is_available, version_str, asset, error_str) {
-
-		// Check the update check date
-		if (self.updateCheckedAt != 0 && new Date().getTime() - self.updateCheckedAt < self.updateCheckInterval) {
-			self._dlog('checkAndUpdate - Not yet reached to interval');
-			callback(false, false, self.appVersion, null);
-			return;
-		}
 
 		if (error_str) {
 			callback(false, false, version_str, error_str);
