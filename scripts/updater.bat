@@ -40,7 +40,7 @@ exit /b 0
 :do_app_self_test
 	echo "Now testing..."
 	:: Launch the app of new version under self testing mode
-	FOR /F "usebackq" %t IN (`start /wait %NEW_VER_DIR%\%APP_NAME% --upd-self-test`) DO SET TEST_RESULT=%t
+	FOR /F "usebackq" %t IN (`"%NEW_VER_DIR%\\%APP_NAME% --upd-self-test"`) DO SET TEST_RESULT=%t
 	:: Check the testing result
 	echo %TEST_RESULT% | find "OKAY" >NUL
 	if ERRORLEVEL 1 (
@@ -53,7 +53,7 @@ exit /b 0
 :: Replace the old version with the new version
 :replace_files
 	echo "Updating..."
-	for /F %%file_path in ('dir %NEW_VER_DIR% /b /s') do (
+	FOR /F %%file_path IN ('dir %NEW_VER_DIR% /b /s') DO (
 		move /Y %file_path% %APP_DIR%\
 	)
 exit /b 0
