@@ -240,7 +240,7 @@ Updater.prototype.update = function(version_str, asset, callback) {
 						var timer = setTimeout(function() {
 							self.isRunning = false;
 							process.exit(0);
-						}, 500);
+						}, 1000);
 
 					});
 				});
@@ -501,30 +501,50 @@ Updater.prototype._doPostProcess = function(new_ver_dir) {
 		}
 	}
 
-	// Get a path of shell script
+	// Get a cmd and args of shell script
 	var sh_dir = path.join(new_ver_dir, 'resources', 'app', 'node_modules', 'electron-updater-gh-releases', 'scripts');
-	var sh_path = null;
+	var sh_cmd = null;
+	var sh_args = [self.execFileName, app_dir, new_ver_dir];
 	if (self.devicePlatform == 'win32') { // Windows
-		var cmd = process.env.COMSPEC || 'cmd.exe';
-		sh_path = cmd + ' /c ' + sh_dir + path.sep + 'updater.bat';
+		sh_cmd = process.env.COMSPEC || 'cmd.exe';
+		sh_args.unshift('/c ' + sh_dir + path.sep + 'updater.bat');
 	} else { // Unix
-		sh_path = 'sh ' + sh_dir + path.sep + 'updater.sh';
+		sh_cmd = '/bin/sh';
+		sh_args.unshift(sh_dir + path.sep + 'updater.sh');
+	}
+
+	// Delete an old log file
+	var log_path = app_dir + path.sep + 'update.log';
+	try {
+		fs.statSync(log_path);
+		fs.unlinkSync(log_path);
+	} catch (e) {}
+
+	// Open a log file handle
+	var fh_out = null, fh_err = null;
+	try {
+		fh_out = fs.openSync(log_path, 'a');
+		fh_err = fs.openSync(log_path, 'a');
+	} catch (e) {
+		return e.toString();
 	}
 
 	// Execute the shell script
-	self._dlog('_doPostProcess - Execute: ' + sh_path + ' ' + self.execFileName + ' ' + app_dir + ' ' + new_ver_dir);
-	var sh_args = [self.execFileName, app_dir, new_ver_dir];
+	self._dlog('_doPostProcess - Execute: ' + sh_cmd + ' ' + sh_args.join(' '));
 	var child = null;
 	try {
-		child = child_process.spawn(sh_path, sh_args, {
+		// Spawn a process
+		child = child_process.spawn(sh_cmd, sh_args, {
 			detached: true,
-			stdio: [ 'ignore', 'ignore', 'ignore' ]
+			stdio: [ 'ignore', fh_out, fh_err ]
 		});
+		// Separate from myself
 		child.unref();
 	} catch (e) {
 		return e.toString();
 	}
 	return null;
+	
 };
 
 
